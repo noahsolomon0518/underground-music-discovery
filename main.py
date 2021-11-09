@@ -2,11 +2,14 @@ from typing import List, Union
 import spotipy
 from spotipy.client import Spotify
 import numpy as np
+import pandas as pd
 from more_itertools import collapse
 
 birdy_uri = 'spotify:artist:2WX2uTcsvV5OnS0inACecP'
 aldn_uri = "https://open.spotify.com/artist/2GUw9Wzha61PkZoRVv1PDD?si=Ov8MB150R0ONxByCv25EQg"
 luke_uri = "https://open.spotify.com/artist/0BvkDsjIUla7X0k6CSWh1I?si=NxDIShP3QsuyV2IWBuoyVQ"
+dylan_uri = "https://open.spotify.com/artist/2Cm6C9PNHioyjRKBfO7n9N?si=39hcxwJuSIeB6nRKTbCR6w"
+brevin_uri = "https://open.spotify.com/artist/7lU8Gtn7moZmPqqu4oPkEh?si=vzbZe3EgScyEECqfrmJECQ"
 
 def get_unpopular_related_artist(spotify: Spotify, artist_id):
   artist = spotify.artist(artist_id)
@@ -68,7 +71,7 @@ class UnpopularRelated:
       related =  self.spotify.artist_related_artists(artist_id)
       selected_artists = self._select_artists(related["artists"])    #artists to be searched next
       filtered_artists = self._filter_artists(selected_artists)     #qualifying artists
-      if filtered_artists:
+      if list(filtered_artists):
         self.qualifying_artists.extend([
           dict(
             name=artist["name"],
@@ -98,13 +101,16 @@ class UnpopularRelated:
 
   def _select_artists(self, artists):
     """Determines which artists will be searched next"""
+    artists = [artist for artist in artists if artist["name"] not in self.searched]
     if(self.selection_method == "random"):
-      return np.random.choice(artists, min(self.max_searches_per_layer, len(artists)), replace=False)
-    if(self.selection_method == "lowest_popularity"):
-      return list(sorted(artists, key=lambda x: x["popularity"]))[:self.max_searches_per_layer]
-    if(self.selection_method == "lowest_followers"):
-      return list(sorted(artists, key=lambda x: x["followers"]["total"]))[:self.max_searches_per_layer]
+      selected = np.random.choice(artists, min(self.max_searches_per_layer, len(artists)), replace=False)
+    elif(self.selection_method == "lowest_popularity"):
+      selected = list(sorted(artists, key=lambda x: x["popularity"]))[:self.max_searches_per_layer]
+    elif(self.selection_method == "lowest_followers"):
+      selected = list(sorted(artists, key=lambda x: x["followers"]["total"]))[:self.max_searches_per_layer]
 
+    self.searched.extend([select["name"] for select in selected])
+    return selected
 
   @property
   def sorted_by_popularity(self):
@@ -131,7 +137,8 @@ SCOPE = 'user-read-private user-read-email'
 def main():
     spotify = Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
     ur = UnpopularRelated(spotify)
-    ur.search(aldn_uri, max_layer=5, max_searches_per_layer=3, selection_method="lowest_popularity")
-    print(ur.sorted_by_followers)
+    ur.search(luke_uri, max_layer=6, max_searches_per_layer=8, selection_method="random")
+    df = pd.DataFrame(ur.sorted_by_followers)
+    df.to_csv("test3.csv")
     
 main()

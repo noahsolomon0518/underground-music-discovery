@@ -1,3 +1,5 @@
+
+
 class UnpopularArtist:
 
     requirements:
@@ -24,6 +26,8 @@ class UnpopularArtist:
             if random picks self.max_searches_per_layer number of artists randomly
             if lowest_followers picks self.max_searches_per_layer of lowest followed artist
             if lowest_popularity picks self.max_searches_per_layer of least popular
+            all selected must not have been searched before
+            all selected artists are added to self.searched
 
 
     
