@@ -1,0 +1,30 @@
+class UnpopularArtist:
+
+    requirements:
+        - Get "unpopular" artist related to list of artist(s) provided
+        - Random each time
+
+    instance variables:
+        - spotipy: spotipy api instance
+        - starting_artist: artists that are used to make related searches
+        - max_artists: number of artists to find until stop searching. If None there is no limit
+        - max_layer: max layer to search up to. Additionaly layers exponentially search more artists. Default = 3
+        - max_popularity - max popularity to include. If None then gets all artist
+        - max_searches_per_layer - how many artists can be searched recursively at each layer. Smaller number leads to less relative artists. Default = 5
+        - genres - only artist who are in listed genres will be returned. If None then does not filter genre
+        - searched - artist ids of ones that are already searched
+        - qualifying_artists - artists that qualify all requirements, their popularity, followers, and genres
+        - selection_method - way to select related artist tree to go down. Can be ["random", "lowest_popularity", "lowest_followers"]
+    functions: 
+        - search(self, starting_artist, max_artists, max_popularity, max_layers, max_searches_per_layer, genres): 
+            general search function. Also sets all instance variables
+        - _get_related_recursively(self): recursive function that follows the related artist
+        - sort_artists_by(self): can sort artist by ["popularity", "followers", "genre"]
+        - select_artists(self): selects related artists to recursively be searched
+            if random picks self.max_searches_per_layer number of artists randomly
+            if lowest_followers picks self.max_searches_per_layer of lowest followed artist
+            if lowest_popularity picks self.max_searches_per_layer of least popular
+
+
+    
+
