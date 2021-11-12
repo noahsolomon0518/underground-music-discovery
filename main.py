@@ -4,6 +4,8 @@ from spotipy.client import Spotify
 import numpy as np
 import pandas as pd
 from more_itertools import collapse
+import matplotlib.pyplot as plt
+
 
 birdy_uri = 'spotify:artist:2WX2uTcsvV5OnS0inACecP'
 aldn_uri = "https://open.spotify.com/artist/2GUw9Wzha61PkZoRVv1PDD?si=Ov8MB150R0ONxByCv25EQg"
@@ -137,8 +139,10 @@ SCOPE = 'user-read-private user-read-email'
 def main():
     spotify = Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
     ur = UnpopularRelated(spotify)
-    ur.search(luke_uri, max_layer=6, max_searches_per_layer=8, selection_method="random")
+    ur.search("https://open.spotify.com/artist/20wkVLutqVOYrc0kxFs7rA?si=q-L7yji0Qd2AhKLrrjvTeA", max_layer=6, max_searches_per_layer=5, selection_method="random")
     df = pd.DataFrame(ur.sorted_by_followers)
-    df.to_csv("test3.csv")
+    df.to_csv("daniel_caesar3.csv")
     
-main()
+
+
+
