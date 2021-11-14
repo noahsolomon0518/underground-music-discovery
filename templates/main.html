@@ -16,22 +16,21 @@
             <h6 style="width: 50%;">
                 Underground Musician Finder is an app that is able to find unknown artists whose music stlye lines up with your own personal taste. Enter the URI of an artist you like and AI is used to find similar artists who don't have many plays. 
             </h6>
-            <h5 style="align-self:flex-start; margin-left: 5px;"><u>Search Parameters</u></h5>
+            <h5 style="margin-top: 15px; margin-bottom: 15px;"><u>Search Parameters</u></h5>
             <div style="width: 65%; height: 100%;">
                 <div class="input-group mb-3">
                     <span class="input-group-text">Artist</span>
-                    <input type="text" class="form-control" placeholder = "URI" aria-label="Username" aria-describedby="basic-addon1">
+                    <input id = "artist-uri" type="text" class="form-control" placeholder = "URI" aria-label="Username" aria-describedby="basic-addon1" required>
                 </div>
     
                 <label for="algorithm" class="form-label">Algorithm</label>
                 <select id="algorithm" class="form-select form-select-md mb-3" aria-label=".form-select-lg example">
-                    <option selected>Select an Algorithm</option>
-                    <option value="1">Random</option>
-                    <option value="2">Popularity</option>
-                    <option value="3">Followers</option>
+                    <option selected value="random">Random</option>
+                    <option value="lowest_popularity">Popularity</option>
+                    <option value="lowest_followers">Followers</option>
                 </select>
-                <label for="customRange2" class="form-label">Algorithm Thouroughness</label>
-                <input type="range" class="form-range" min="1" max="3" id="customRange2">
+                <label for="algorithm-thoroughness" class="form-label">Algorithm Thoroughness</label>
+                <input type="range" class="form-range" min="1" max="3" id="algorithm-thoroughness">
 
                 <div style="display: flex; width: 100%; justify-content: space-between;">
                     <p style="justify-self: start; font-size:  smaller; " class = "text-muted">Low</p>
@@ -39,50 +38,30 @@
                     <p style="justify-self: end; font-size:  smaller; " class = "text-muted">High</p>
                 </div>
 
-                <label for="customRange2" class="form-label">Algorithm Relativity</label>
-                <input type="range" class="form-range" min="1" max="3" id="customRange2">
+                <label for="algorithm-relativity" class="form-label">Algorithm Relativity</label>
+                <input type="range" class="form-range" min="1" max="3" id="algorithm-relativity">
 
                 <div style="display: flex; width: 100%; justify-content: space-between;">
                     <p style="justify-self: start; font-size:  smaller; " class = "text-muted">Low</p>
                     <p style="justify-self: center; font-size:  smaller; " class = "text-muted">Medium</p>
                     <p style="justify-self: end; font-size:  smaller; " class = "text-muted">High</p>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Search</button>
+                <button onclick="table.search()" class="btn btn-primary" style="width: 100%;">Search</button>
             </div>
         </section>
         
-        <section id = "search" style="background-color: whitesmoke; margin: 0px; padding: 10px; height: 400px;">
-            <h5 style=" margin-left: 5px;"><u>Search Results</u></h5>
+        <section id = "search" style="background-color: whitesmoke; margin: 0px; padding: 10px;">
+            <div style="text-align: center;">
+                <h5 style=" margin-top: 15px;"><u>Search Results - Top 50</u></h5>
+            </div>
             <table class="table" id = "search-results-table">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">URI</th>
-                    <th scope="col">Followers</th>
-                    <th scope="col">Popularity</th>
-                  </tr>
-                </thead>
-                <tbody>
-              
-                </tbody>
-              </table>
-            <div class="fluid-container">
-                <div class="row">
-                    <div class="col-1">
-                        <select id="algorithm" class="form-select form-select-sm mb-3" aria-label=".form-select-lg example">
-                            <option selected>Sort By</option>
-                            <option value="1">Random</option>
-                            <option value="2">Popularity</option>
-                            <option value="3">Followers</option>
-                        </select>
-                    </div>
-                    <div class="col-1">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm" style="width: 100%; margin: 0px; background-color: white; border-color: gainsboro;">To CSV</button>
-                    </div>
-                </div>
+          
+            </table>
+            <div class="fluid-container" id = "table-buttons">
+
             </div>
 
         </section>
     </body>
+    <script src = "static/table.js"></script>
 </html>

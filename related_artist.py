@@ -133,15 +133,9 @@ class UnpopularRelated:
 
 CLIENT_ID = "9e774700a78045659ac8d6d8c5a182fa"
 CLIENT_SECRET = "4af0eeb56b2b44eaaea3282ec0e0362f"
-SCOPE = 'user-read-private user-read-email'
 
-
-def main():
-    spotify = Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
-    ur = UnpopularRelated(spotify)
-    ur.search("https://open.spotify.com/artist/20wkVLutqVOYrc0kxFs7rA?si=q-L7yji0Qd2AhKLrrjvTeA", max_layer=6, max_searches_per_layer=5, selection_method="random")
-    df = pd.DataFrame(ur.sorted_by_followers)
-    df.to_csv("daniel_caesar3.csv")
+def get_spotify():
+    return Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
     
 
 

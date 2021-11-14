@@ -1,0 +1,18 @@
+table
+    job: When search button clicked searches for related artist
+
+    instance variables
+        tableData: json representation of tables data
+        tableID: html id of table
+
+
+    functions
+        _getInputData(): gets the input values from forms and puts inside JSON
+        _getRelatedArtistData(inputData): sends get request and gets data from api
+        _updateTableData(tableData): updates table with data
+        _getTableData(): gets json representation of table
+        search(): searches related artist and updates table
+        sortBy(element): get data of table sorts data by element then updates
+
+
+    
