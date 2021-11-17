@@ -2,9 +2,7 @@ from typing import List, Union
 import spotipy
 from spotipy.client import Spotify
 import numpy as np
-import pandas as pd
-from more_itertools import collapse
-import matplotlib.pyplot as plt
+
 
 
 birdy_uri = 'spotify:artist:2WX2uTcsvV5OnS0inACecP'
@@ -113,7 +111,6 @@ class UnpopularRelated:
 
     self.searched.extend([select["name"] for select in selected])
     return selected
-
   @property
   def sorted_by_popularity(self):
     return list(sorted(self.qualifying_artists, key=lambda x: x["popularity"]))
