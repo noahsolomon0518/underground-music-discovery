@@ -22,6 +22,13 @@ def get_related_artists():
     print(results)
     return jsonify(results)
 
+@app.route("/search_artists/<artist>", methods = ['GET'])
+def get_search_suggestions(artist):
+    results = related_artist_finder.spotify.search(artist, type = "artist")
+    results = [(suggest["name"], suggest["uri"]) for suggest in results["artists"]["items"]]
+    return jsonify(results)
+
+
 
 if __name__ == "__main__":  
     app.run()
