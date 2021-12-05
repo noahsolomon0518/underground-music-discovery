@@ -20,8 +20,11 @@
             <div style="width: 65%; height: 100%;">
                 <div class="input-group mb-3">
                     <span class="input-group-text">Artist</span>
-                    <input id = "artist-uri" type="text" class="form-control" placeholder = "URI" aria-label="Username" aria-describedby="basic-addon1" required>
+                    <input id = "artist-uri" list="artist-data" type="text" class="form-control" placeholder = "URI" aria-label="Username" aria-describedby="basic-addon1" required>
                 </div>
+                <datalist id = "artist-data">
+                    <option value="hi"></option>
+                </datalist>
     
                 <label for="algorithm" class="form-label">Algorithm</label>
                 <select id="algorithm" class="form-select form-select-md mb-3" aria-label=".form-select-lg example">
@@ -64,6 +67,6 @@
         </section>
     </body>
     <script src = "static/table.js"></script>
-    <script src = "static/table_auto_complete.js"></script>
+    <script src = "static/search_auto_complete.js"></script>
 
 </html>

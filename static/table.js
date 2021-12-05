@@ -125,7 +125,6 @@ class Table {
 
 
     sortBy(method){
-        console.log(method)
         var sorted = null
         if(method == "popularity" || method == "followers"){
             sorted = this.tableData.sort((a,b) => a[method] - b[method])
@@ -147,9 +146,7 @@ class Table {
     }
 
 
-    downloadCSV(){
 
-    }
 }
 
 
