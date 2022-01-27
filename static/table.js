@@ -2,7 +2,7 @@ var script = document.createElement('script');
 script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js';
 script.type = 'text/javascript';
 document.getElementsByTagName('head')[0].appendChild(script);
-
+artistMap = {}
 
 function jsonToCSV(json){
     const items = json
@@ -50,7 +50,7 @@ class Table {
         var thoroughness = document.getElementById("algorithm-thoroughness").value
         var relativity = document.getElementById("algorithm-relativity").value
         return {
-            artistURI: artistURI,
+            artistURI: artistMap[artistURI],
             algorithm: algorithm,
             thoroughness: thoroughness,
             relativity: relativity
@@ -117,10 +117,13 @@ class Table {
     }
 
     async search() {
+        var inputData = this.#getInputData()
+        if(inputData["artistURI"]!=undefined){
+            var data = await this.#getRelatedArtistData(inputData)
 
-        var data = await this.#getRelatedArtistData(this.#getInputData())
-
-        this.#updateTableData(data, ["name", "popularity", "followers"])
+            this.#updateTableData(data, ["name", "popularity", "followers"])
+        }
+        
     }
 
 
@@ -155,3 +158,51 @@ class Table {
 
 
 var table = new Table()
+
+
+
+
+
+
+function autocomplete(obj, arr) {
+
+    options = ""
+    arr.forEach(element => {
+        options += "<option value = \"" + element[0] + "\"><data value = \""+ element[1] +"\"></option>"
+    })
+    document.getElementById("artist-data").innerHTML = options
+}
+
+function updateDict(artistAndURI){
+    artistMap = {}
+    artistAndURI.forEach((element) => {
+        if (!(element[0] in artistMap)){
+            artistMap[element[0]] = element[1]
+        }
+    })
+
+}
+
+    
+document.getElementById("artist-uri").addEventListener("keyup", (event)=>{
+    search = document.getElementById("artist-uri").value
+    console.log(search.replace(/\s/g, '').length)
+    if(search.replace(/\s/g, '').length != 0 ){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", '/search_artists/'+search);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function () { // Call a function when the state changes.
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                artists = JSON.parse(this.response)
+                console.log(artists)
+                autocomplete(document.getElementById("artist-uri"), artists.map((element)=>element) );
+                updateDict(artists)
+            }else {
+                console.log("Error", this.status);
+            }
+        }
+        xhr.send()
+
+    }
+
+})
