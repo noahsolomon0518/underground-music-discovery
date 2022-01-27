@@ -4,6 +4,7 @@ script.type = 'text/javascript';
 document.getElementsByTagName('head')[0].appendChild(script);
 artistMap = {}
 
+
 function jsonToCSV(json){
     const items = json
     const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
@@ -13,6 +14,17 @@ function jsonToCSV(json){
     ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
     ].join('\r\n')
     return csv
+}
+
+function waitAnimationForSearch (element, searchElement, waitingTime = 200) {
+    //elements' text will animate ...
+    if (!(searchElement.isSearching)) {
+        element.innerHTML = "Search"
+    } else {
+        element.innerHTML = element.innerHTML.split(".").length - 1 == 3? "Searching": element.innerHTML + "."
+        console.log(element.value.split(".").length - 1)
+        setTimeout(waitAnimationForSearch, waitingTime, element, searchElement, waitingTime); // try again in 300 milliseconds
+    }
 }
 
 
@@ -42,6 +54,7 @@ class Table {
         this.html_id = Table.HTML_ID
         this.table = document.getElementById(this.html_id)
         this.tableData = null
+        this.isSearching = false
     }
 
     #getInputData() {
@@ -118,11 +131,18 @@ class Table {
 
     async search() {
         var inputData = this.#getInputData()
-        if(inputData["artistURI"]!=undefined){
-            var data = await this.#getRelatedArtistData(inputData)
 
+        if(typeof(inputData["artistURI"])!="undefined"){
+            this.isSearching = true
+
+            var searchButton = document.getElementById("search-button")
+            waitAnimationForSearch(searchButton, this)
+            searchButton.innerHTML = "Searching"
+            var data = await this.#getRelatedArtistData(inputData)
+            this.isSearching = false
             this.#updateTableData(data, ["name", "popularity", "followers"])
         }
+        
         
     }
 
@@ -152,12 +172,12 @@ class Table {
 
 }
 
-
-
-
-
-
 var table = new Table()
+
+
+
+
+
 
 
 
