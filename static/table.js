@@ -97,7 +97,7 @@ class Table {
         var table = ""
 
         $.each(fields, function (index, field) {
-            header += "<th>" + field + "</th>"
+            header += "<th style = \"text-align: center;\">" + field + "</th>"
         })
 
         header += "</tr></thead>"
@@ -110,9 +110,9 @@ class Table {
                 var row = '<tr>';
                 $.each(fields, function (index, field) {
                     if(field == "name"){
-                        row += '<td><a target="_blank" style = "text-decoration: none;" href = ' + item["url"] + '>' + item[field + ''] + '</a></td>';
+                        row += '<td style = "text-align: center;"><a target="_blank" style = "text-decoration: none;" href = ' + item["url"] + '>' + item[field + ''] + '</a></td>';
                     }else{
-                        row += '<td>' + item[field + ''] + '</td>';
+                        row += '<td style = "text-align: center;">' + item[field + ''] + '</td>';
                     }
                 })
                 rows += row + '</tr>'
