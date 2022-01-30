@@ -2,7 +2,7 @@
 
 class UnpopularArtist:
 
-    requirements:
+    purpose:
         - Get "unpopular" artist related to list of artist(s) provided
         - Random each time
 
@@ -28,6 +28,32 @@ class UnpopularArtist:
             if lowest_popularity picks self.max_searches_per_layer of least popular
             all selected must not have been searched before
             all selected artists are added to self.searched
+
+
+class PlaylistGenerator
+
+
+    purpose:
+        - Filters artist by conditions then generates playlist of certain length
+
+    instance variables:
+        - spotipy: spotipy api instance
+        - length: number of tracks that will try to find. Defined at intialization
+        - playlist_name: what the playlist will be saved as. Default = None
+        - user_id: id of user
+
+
+    functions:
+        - generate(artists, max_popularity, max_followers, song_picking_method): generates the playlist
+            1. gets filtered artists
+            2. 
+        - _filter_conditions(self, unfiltered_artists, max_popularity, max_followers): filters based on conditions
+        - _pick_songs_randomly(self, filtered_artists): picks songs randomly. NO DUPLICATES
+        - _pick_songs_by_popularity(self, filtered_artists): picks songs by highest popularity. NO DUPLICATES
+        - _create_playlist(self): creates empty playlist
+        - _add_songs_to_playlist(self, songs)
+
+
 
 
     

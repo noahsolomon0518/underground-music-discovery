@@ -42,6 +42,11 @@ tableButtons = `
                     <div class="col-1">
                         <a id = "to-csv" class="btn btn-outline-secondary btn-sm" style="width: 100%; margin: 0px; background-color: white; border-color: gainsboro;">To CSV</a>
                     </div>
+                    <div class="col-1">
+                        <a class="btn btn-outline-secondary btn-sm" style="width: 100%; margin: 0px; background-color: white; border-color: gainsboro;" data-toggle="modal" data-target="#exampleModalCenter">
+                            Generate Playlist
+                        </a>
+                    </div>
                 </div>
             </div>
 `
@@ -60,13 +65,11 @@ class Table {
     #getInputData() {
         var artistURI = document.getElementById("artist-uri").value
         var algorithm = document.getElementById("algorithm").value
-        var thoroughness = document.getElementById("algorithm-thoroughness").value
-        var relativity = document.getElementById("algorithm-relativity").value
         return {
             artistURI: artistMap[artistURI],
             algorithm: algorithm,
-            thoroughness: thoroughness,
-            relativity: relativity
+            relativity: 4,
+            thoroughness: 4
         }
     }
 
