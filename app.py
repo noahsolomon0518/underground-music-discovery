@@ -1,15 +1,11 @@
 import ast
-from wsgiref import headers
-from xmlrpc.client import ResponseError
 from flask import Flask, make_response, redirect, url_for
-from flask_caching import Cache
 from flask import render_template
 from flask import request
 import base64
 import uuid
-import json
 import requests
-from urllib import parse, response
+from urllib import parse
 from flask.json import jsonify
 from related_artist import CLIENT_SECRET, UnpopularRelated, get_spotify
 
