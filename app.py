@@ -1,13 +1,16 @@
 import ast
-from flask import Flask, make_response, redirect, url_for
+from flask import Flask, make_response, redirect, url_for, session
 from flask import render_template
 from flask import request
-import base64
 import uuid
 import requests
+from flask_session import Session
+
 from urllib import parse
 from flask.json import jsonify
-from related_artist import CLIENT_SECRET, UnpopularRelated, get_spotify
+from related_artist import UnpopularRelated, get_spotify
+from config import *
+from authorize_spotify import *
 
 
 #Can control 
@@ -16,11 +19,15 @@ user_state = {
 }
 
 app = Flask(__name__)
+app.secret_key = "ahhhhh its a secret"
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
+
 
 spotify =  get_spotify()
 related_artist_finder = UnpopularRelated(spotify)
 
-CLIENT_ID = "9e774700a78045659ac8d6d8c5a182fa"
+
 
 @app.route("/")
 def hello_world():
@@ -37,7 +44,6 @@ def get_related_artists():
     thoroughness = int(params["thoroughness"])
     algorithm:str = params["algorithm"].lower()
     results = related_artist_finder.search(starting_artists = params["artistURI"], selection_method = algorithm, max_layer = relativity, max_searches_per_layer = thoroughness)
-    print(results)
     return jsonify(results)
 
 @app.route("/search_artists/<artist>", methods = ['GET'])
@@ -50,54 +56,23 @@ def get_search_suggestions(artist):
 def login_to_spotify():
     """Login to spotify"""
     state = uuid.uuid1()
-    client_ID = CLIENT_ID
     scope = 'user-read-private user-read-email';
-    redirect_uri = request.base_url.replace("/login_to_spotify", "/generate_playlist")
-    
-    return redirect("https://accounts.spotify.com/authorize?"+parse.urlencode({
-        "state":state,
-        "scope": scope,
-        "redirect_uri": redirect_uri,
-        "client_id": client_ID,
-        "response_type": "code"
-    }))
+    redirect_uri = request.base_url.replace("/login_to_spotify", "/related_artist_playlist_generator")
+    app.logger.info("Redirect uri %s", redirect_uri)
+    return redirect_to_spotify_login(state, scope, redirect_uri)
 
-@app.route("/generate_playlist", methods = ["GET"])
-def get_tokens():
-    """Gets tokens for spotify api"""
-    errors = None
-    if("code" not in request.args.keys()):
-        return jsonify({"status": 400})
-    else:
-        string = CLIENT_ID + ":" + CLIENT_SECRET
-        string_bytes = string.encode("ascii")
-        base64_bytes = base64.b64encode(string_bytes)
-        base64_string = base64_bytes.decode("ascii")
-        redirect_uri = request.base_url
-        body = {
-            "grant_type": "authorization_code",
-            "code": request.args["code"],
-            "redirect_uri": redirect_uri
-        }
-        headers = {
-            "Authorization": "Basic " + base64_string,
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        response = requests.post("https://accounts.spotify.com/api/token", data=body, headers=headers) 
-        access_token = ast.literal_eval(response.text)
-        return access_token
+@app.route("/related_artist_playlist_generator", methods = ["GET"])
+def related_artist_playlist_generator():
+    if "access_token" not in session.keys() and "code" not in request.args:
+        return redirect("/login_to_spotify")
+    elif("access_token" not in session.keys() and "code" in request.args):
+        #get access code
+        app.logger.info("Getting access code")
+        access_token = get_access_token(request.args["code"], request.base_url)
+        app.logger.info("User logged in with an access code of %s", access_token)
+        session["access_token"] = access_token
+    return render_template("generate_playlist.html")
 
-
-@app.route("/generate_playlist", methods = ["GET"])
-def generate_playlist():
-    """After log into spotify sent to this page which generates playlist"""
-    if("code" not in request.args):
-        return make_response("ERROR: Must login to spotify", 401)
-    tokens = requests.get(request.base_url, params=request.args).text
-    dict_token = ast.literal_eval(tokens.replace("\\", "").rstrip("\"").lstrip("\""))
-    print(dict_token)
-
-    return render_template("generate_playlist", token = dict_token)
 
 
 if __name__ == "__main__":  

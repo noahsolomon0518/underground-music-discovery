@@ -2,6 +2,7 @@ from typing import List, Union
 import spotipy
 from spotipy.client import Spotify
 import numpy as np
+from config import *
 
 
 
@@ -128,8 +129,8 @@ class UnpopularRelated:
 
    
 
-CLIENT_ID = "9e774700a78045659ac8d6d8c5a182fa"
-CLIENT_SECRET = "4af0eeb56b2b44eaaea3282ec0e0362f"
+
+
 
 def get_spotify():
     return Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))

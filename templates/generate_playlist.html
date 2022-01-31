@@ -6,13 +6,78 @@
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 </head>
 
-<body style="padding: 0px; margin: 0px;">    
-    {{ token }}
+<body style="padding: 0px; margin: 0px;">
+    <nav id="title" class="d-flex align-items-center justify-content-center"
+        style="margin: 0px; padding: 0px; background-color: rgb(26, 26, 26); width: 100%; height: 100px;">
+
+        <p class="fs-1" style="padding: 0px; margin: 0px; color: white;">Related Artist Playlist Generator</p>
+
+
+    </nav>
+
+    <section id="search"
+        style="width: 100%; background-color: whitesmoke; margin: 0px; padding: 10px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+
+        <p class="display-6" style="width: 50%; margin: 50px; text-align: center;">
+            This app uses the spotify API <strong>related artist</strong> feature generate and save a playlist to your
+            account with songs by artists who are similar to the artist entered below.
+        </p>
+
+
+        <div style="width: 300px; height: 100%;">
+            <div class="mb-3">
+                <input type="text" class="form-control" id="playlist-name" placeholder="Playlist name">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Artist</span>
+                <input id="artist-uri" list="artist-data" type="text" class="form-control" placeholder="URI"
+                    aria-label="Username" aria-describedby="basic-addon1" required>
+            </div>
+            <datalist id="artist-data">
+
+            </datalist>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="playlist-name" placeholder="Artist max popularity">
+            </div>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="playlist-name" placeholder="Artist max followers">
+            </div>
+  
+            <select id="algorithm" class="form-select form-select-md mb-3" aria-label=".form-select-lg example">
+                <option disabled selected>Song choice method</option>
+                <option value="most_popular">Most popular</option>
+                <option value="random">Random</option>
+            </select>
+
+
+            <button id="search-button" onclick="table.search()" class="btn btn-primary"
+                style="width: 100%;">Search</button>
+        </div>
+    </section>
+
+
+
+    <section id="search" style="background-color: whitesmoke; margin: 0px; padding: 10px;">
+
+        <table class="table" style=" table-layout: fixed; margin-top: 20px;" id="search-results-table">
+
+        </table>
+        <div class="fluid-container" id="table-buttons">
+
+        </div>
+
+    </section>
 </body>
 <script src="static/table.js"></script>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
 
 
 </html>
