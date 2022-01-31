@@ -120,21 +120,15 @@ class UnpopularRelated:
   def sorted_by_followers(self):
     return list(sorted(self.qualifying_artists, key=lambda x: x["followers"]))
 
-  
-
-
-
-
-
-
-   
-
-
-
 
 def get_spotify():
-    return Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
+  return Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
     
 
 
 
+class PlaylistGenerator:
+  def __init__(self, access_code):
+    self.access_code = access_code
+
+    

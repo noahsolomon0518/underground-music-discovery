@@ -36,26 +36,24 @@ class GeneratedPlaylist
     purpose:
         - Finds related artist by conditions then generates playlist of certain length
 
-    class variables:
-        These are parameters that I can only tinker with not the user
-        - LENGTH: length of playlist
-        - ALLOW_DUPLICATE_ARTIST: whether to allow duplicate 
 
     instance variables:
         - access_token: access token that can be used to use spotify api
-        - playlist_name: what the playlist will be saved as. Default = None
-        - song_picking_method: how to pick songs in playlist
-        - artist_picking_method: how to pick artist
-        - initial_artist: initial artist to start picking with
+
 
 
     functions:
-        - generate( max_popularity, max_followers, song_picking_method): generates the playlist
-            1. gets artist
-            2. 
-        - _filter_conditions(self, unfiltered_artists, max_popularity, max_followers): filters based on conditions
-        - _pick_songs_randomly(self, filtered_artists): picks songs randomly. NO DUPLICATES
-        - _pick_songs_by_popularity(self, filtered_artists): picks songs by highest popularity. NO DUPLICATES
+        - generate(max_popularity, max_followers, song_picking_method, search_algorithmc): generates the playlist
+            Repeats until n songs have been picked
+                1. gets artist from related artist recursion tree
+                2. see if meets conditions
+                3. if conditions met picks song
+            Creates and adds all songs to playlist
+
+
+        - _conditioner(self, artist, max_popularity, max_followers): filters based on conditions
+        - _pick_song_randomly(self, artist): picks songs randomly. NO DUPLICATES
+        - _pick_song_by_popularity(self, artist): picks songs by highest popularity. NO DUPLICATES
         - _create_playlist(self): creates empty playlist
         - _add_songs_to_playlist(self, songs)
 
