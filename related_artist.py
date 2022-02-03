@@ -1,10 +1,11 @@
 from itertools import chain
 import logging
 import random
-from itsdangerous import json
+from urllib import response
 import requests
+from requests.exceptions import RequestException
 from typing import Dict, Iterable, List, Union
-from flask import request
+from flask import Response, request
 import spotipy
 from spotipy.client import Spotify
 import numpy as np
@@ -131,8 +132,6 @@ def get_spotify():
   return Spotify(client_credentials_manager= spotipy.SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET))
     
 
-
-
 class RelatedArtistFinder:
   """Finds related artists. Requires authentication"""
   def __init__(self, access_token, artist_id, artist_selection_method = "random", max_searches_per_artist = 4, number_of_artists = 100, max_popularity = 100, max_followers = 100_000_000):
@@ -155,13 +154,13 @@ class RelatedArtistFinder:
     }
 
   def get_related_artists(self, artist_id):
-      related_artists = requests.get(f"https://api.spotify.com/v1/artists/{str(artist_id)}/related-artists", headers= self.authorization_header)
-      if(related_artists.status_code == 200):
-        return related_artists.json()["artists"]
-      else: 
-        print("Some type of error. Status code ->", related_artists.status_code)
-        print(related_artists.text)
-        return []
+    related_artists = requests.get(f"https://api.spotify.com/v1/artists/{str(artist_id)}/related-artists", headers= self.authorization_header)
+
+    related_artists.raise_for_status()
+    return related_artists.json()["artists"]
+
+
+
 
   def search(self):
     """Searches related artist tree"""
@@ -175,11 +174,10 @@ class RelatedArtistFinder:
       qualifying_artists_from_layer = self._filter_artists(list(chain.from_iterable(current_artists_from_layer.copy())))
       self.qualifying_artists.extend(qualifying_artists_from_layer)
       n += len(qualifying_artists_from_layer)
+      print(str(n) + " artists found.")
       if(n <= self.number_of_artists):
         artists_to_be_searched = self._select_artists(current_artists_from_layer)
-    print("Finished searching for related artists. Found ", str(len(self.qualifying_artists)), ".")
-    print(len(self.qualifying_artists_ids), len(set(self.qualifying_artists_ids)))
-
+    return "1"
 
     
     
@@ -188,11 +186,11 @@ class RelatedArtistFinder:
     """Gets one layer of related artist"""
     if(type(artist_ids)!=list):
       artist_ids = [artist_ids]
-    related = [self.get_related_artists(artist_id) for artist_id in artist_ids if artist_id]
-    return related
+    return [self.get_related_artists(artist_id) for artist_id in artist_ids if artist_id]
+    
+
   
   def _filter_artists(self, artists: List):
-    logging.info("Filtering artist of the following: %s", artists)
     qualifying_artists = []
     for artist in artists:
       if(artist["popularity"] <= self.max_popularity and artist["followers"]["total"] <= self.max_followers and artist["id"] not in self.qualifying_artists_ids):
@@ -246,6 +244,7 @@ class PlaylistGenerator:
     self.artist_ids = random.sample(artist_ids, min((100, len(artist_ids))))    #limit to 100 artists
     self.playlist = []
     self.authorization_header = self.get_authorization_header()
+    self.user_id = None
 
   def get_authorization_header(self):
     return {
@@ -261,6 +260,7 @@ class PlaylistGenerator:
       song_uri = self._find_song(id)
       if(song_uri):
         self.playlist.append(song_uri)
+    
 
 
   def save_playlist(self):
@@ -269,18 +269,25 @@ class PlaylistGenerator:
       raise BaseException("No songs in playlists")
 
     user_id_request = requests.get("https://api.spotify.com/v1/me", headers=self.authorization_header)
-    print("Get user id ->", user_id_request.status_code)
+    user_id_request.raise_for_status()
+    logging.info("Get user id -> %s", user_id_request.status_code)
     user_id = user_id_request.json()["id"]
-    print("user_id =", user_id)
+    self.user_id = user_id
+    logging.info("user_id = %s", user_id)
 
     playlist_id_request = requests.post(f"https://api.spotify.com/v1/users/{user_id}/playlists", headers=self.authorization_header, json={"name":self.playlist_name})
-    print("Create playlist ->", playlist_id_request.status_code)
-    print(playlist_id_request.text)
+    playlist_id_request.raise_for_status()
+    logging.info("Create playlist -> %s", playlist_id_request.status_code)
+    logging.info(playlist_id_request.text)
     playlist_id = playlist_id_request.json()["id"]
 
 
     add_tracks_request = requests.post(f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks", headers=self.authorization_header, json={"uris":self.playlist})
-    print("Add tracks to playlist ->", add_tracks_request.status_code)
+    add_tracks_request.raise_for_status()
+    logging.info("Add tracks to playlist -> %s", add_tracks_request.status_code)
+
+
+    
 
     
 
@@ -289,6 +296,7 @@ class PlaylistGenerator:
     """Finds song from an artist randomly from top tracks"""
   
     response = requests.get(f"https://api.spotify.com/v1/artists/{str(artist_id)}/top-tracks", headers= self.authorization_header, params={"market":"US"})
+    response.raise_for_status()
     track_uris = [track["uri"] for track in response.json()["tracks"]]
     track_uri = track_uris[random.choice(range(len(track_uris)))] if len(track_uris) > 0 else None
     return track_uri

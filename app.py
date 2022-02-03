@@ -4,7 +4,7 @@ from flask import render_template
 from flask import request
 import uuid
 from flask_session import Session
-
+from requests.exceptions import RequestException
 from flask.json import jsonify
 from related_artist import RelatedArtistFinder, RelatedArtistsFinderSpotipy, get_spotify, PlaylistGenerator
 from config import *
@@ -98,17 +98,36 @@ def post_related_artist_playlist_generator():
 
 
     #Find related artists
-    related_artists = RelatedArtistFinder(session["access_token"], artist, artist_selection_method, 4, 100, max_popularity, max_followers)
-    related_artists.search()
+    related_artists = RelatedArtistFinder(session["access_token"], artist, artist_selection_method, 4, 3000, max_popularity, max_followers)
+
+    try:
+        app.logger.info("User attempting to find related artists tree.")
+        related_artists.search()
+    except RequestException as err:
+        app.logger.error("Error encountered while searching for related artists. Exception: " + str(err.response.status_code) + " " + err.response.reason)
+        return str(err.response.status_code)
     
     #Generate and save playlist
     generated_playlist = PlaylistGenerator(session["access_token"], related_artists.artist_ids, playlist_name)
-    generated_playlist.generate_playlist()
-    generated_playlist.save_playlist()
-    print("Playlist saved.")
+
+    try:
+        app.logger.info("User attempting to generate playlist.")
+        generated_playlist.generate_playlist()
+    except RequestException as err:
+        app.logger.error("Error encountered while generating playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
+        return "0"
+
+    try:
+        app.logger.info("User attempting to save playlist.")
+        generated_playlist.save_playlist()
+    except RequestException as err:
+        app.logger.error("Error encountered while saving playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
+        return "0"
+
+    app.logger.info("User [%s] successfully generated playlist", generated_playlist.user_id)
 
 
-    return jsonify(generated_playlist.playlist)
+    return "1"
     
 
 
