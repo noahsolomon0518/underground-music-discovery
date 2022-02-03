@@ -1,4 +1,3 @@
-import ast
 from datetime import datetime
 from flask import Flask, make_response, redirect, url_for, session
 from flask import render_template

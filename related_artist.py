@@ -1,9 +1,6 @@
-from dataclasses import replace
 from itertools import chain
 import logging
-from msilib.schema import Error
 import random
-import warnings
 from itsdangerous import json
 import requests
 from typing import Dict, Iterable, List, Union
@@ -11,9 +8,7 @@ from flask import request
 import spotipy
 from spotipy.client import Spotify
 import numpy as np
-from authorize_spotify import get_authorization_header
 from config import *
-from urllib import parse
 
 
 
