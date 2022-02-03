@@ -43,19 +43,28 @@ class GeneratedPlaylist
 
 
     functions:
-        - generate(max_popularity, max_followers, song_picking_method, search_algorithmc): generates the playlist
-            Repeats until n songs have been picked
-                1. gets artist from related artist recursion tree
-                2. see if meets conditions
-                3. if conditions met picks song
+        - generate_and_save(max_popularity, max_followers, song_picking_method, search_algorithmc): generates the playlist
+            Repeats until n artist have been picked
+                1. gets artist from related artist recursion tree layer based on selected artists
+                2. add all related artist that meet conditions to qualifying artists and artist that are not in qualifying artists
+                3. add all related artist that meet conditions ids to searched
+                3. select artists to search next based on each partition and 
             Creates and adds all songs to playlist
 
 
-        - _conditioner(self, artist, max_popularity, max_followers): filters based on conditions
-        - _pick_song_randomly(self, artist): picks songs randomly. NO DUPLICATES
-        - _pick_song_by_popularity(self, artist): picks songs by highest popularity. NO DUPLICATES
-        - _create_playlist(self): creates empty playlist
-        - _add_songs_to_playlist(self, songs)
+        - _get_related_artist_layer(self, selected_artists_ids: List): returns list of list of related artists based on where came from
+        - _filter_artists(self, artists: List[List]): returns artists that meet conditions
+        - _select_artists(self, artists: List[List]): selects next artist to be searched for each partition
+            if random picks self.max_searches_per_layer number of artists randomly for each partition
+            if lowest_followers picks self.max_searches_per_layer of lowest followed artist for each partition
+            if lowest_popularity picks self.max_searches_per_layer of least popular for each partition
+            all selected must not have been searched before
+            all selected artists are added to self.searched
+            for each partition:
+                for each artist:
+
+
+        
 
 
 

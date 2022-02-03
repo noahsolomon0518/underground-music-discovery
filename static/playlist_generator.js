@@ -28,32 +28,12 @@ function waitAnimationForSearch (element, searchElement, waitingTime = 200) {
 }
 
 
-tableButtons = `
-<div class="fluid-container">
-                <div class="row">
-                    <div class="col-1">
-                        <select id="sort-by" onchange="table.sortBy(this.value)" class="form-select form-select-sm mb-3" aria-label=".form-select-lg example">
-                            <option selected>Sort By</option>
-                            <option value="random">Random</option>
-                            <option value="popularity">Popularity</option>
-                            <option value="followers">Followers</option>
-                        </select>
-                    </div>
-                    <div class="col-1">
-                        <a id = "to-csv" class="btn btn-outline-secondary btn-sm" style="width: 100%; margin: 0px; background-color: white; border-color: gainsboro;">To CSV</a>
-                    </div>
-                    <div class="col-1">
-                        <a class="btn btn-outline-secondary btn-sm" style="width: 100%; margin: 0px; background-color: white; border-color: gainsboro;" data-toggle="modal" data-target="#exampleModalCenter">
-                            Generate Playlist
-                        </a>
-                    </div>
-                </div>
-            </div>
-`
+
 
 class Table {
 
     static HTML_ID = "search-results-table"
+ 
 
     constructor() {
         this.html_id = Table.HTML_ID
@@ -63,21 +43,28 @@ class Table {
     }
 
     #getInputData() {
-        var artistURI = document.getElementById("artist-uri").value
-        var algorithm = document.getElementById("algorithm").value
+        var artistID = document.getElementById("artist-id").value
+        var playlistName = document.getElementById("playlist-name").value
+        var maxPopularity = document.getElementById("artist-max-popularity").value
+        var maxFollowers = document.getElementById("artist-max-followers").value
+        var artistSelectionMethod = document.getElementById("artist-selection-method").value
         return {
-            artistURI: artistMap[artistURI],
-            algorithm: algorithm,
-            relativity: 4,
-            thoroughness: 4
+            artistID: artistMap[artistID],
+            playlistName: playlistName,
+            maxFollowers: maxFollowers,
+            maxPopularity: maxPopularity,
+            artistSelectionMethod: artistSelectionMethod
         }
     }
-
-    #getRelatedArtistData(inputData) {
+    
+    
+    
+    
+    #getGeneratedPlaylist(inputData) {
         return new Promise(resolve => {
             setTimeout(() => {
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", '/relatedartists', true);
+                xhr.open("POST", '/related_artist_playlist_generator', true);
                 xhr.setRequestHeader("Content-Type", "application/json");
                 xhr.onreadystatechange = function () { // Call a function when the state changes.
                     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
@@ -135,15 +122,14 @@ class Table {
     async search() {
         var inputData = this.#getInputData()
 
-        if(typeof(inputData["artistURI"])!="undefined"){
+        if(typeof(inputData["artistID"])!="undefined"){
             this.isSearching = true
 
             var searchButton = document.getElementById("search-button")
             waitAnimationForSearch(searchButton, this)
             searchButton.innerHTML = "Searching"
-            var data = await this.#getRelatedArtistData(inputData)
+            var data = await this.#getGeneratedPlaylist(inputData)
             this.isSearching = false
-            this.#updateTableData(data, ["name", "popularity", "followers"])
         }
         
         
@@ -191,7 +177,7 @@ function autocomplete(obj, arr) {
 
     options = ""
     arr.forEach(element => {
-        options += "<option value = \"" + element[0] + "\"><data value = \""+ element[1] +"\"></option>"
+        options += "<option value = \"" + element[0] + "\"><data value = \""+ element[2] +"\"></option>"
     })
     document.getElementById("artist-data").innerHTML = options
 }
@@ -200,15 +186,15 @@ function updateDict(artistAndURI){
     artistMap = {}
     artistAndURI.forEach((element) => {
         if (!(element[0] in artistMap)){
-            artistMap[element[0]] = element[1]
+            artistMap[element[0]] = element[2]
         }
     })
 
 }
 
     
-document.getElementById("artist-uri").addEventListener("keyup", (event)=>{
-    search = document.getElementById("artist-uri").value
+document.getElementById("artist-id").addEventListener("keyup", (event)=>{
+    search = document.getElementById("artist-id").value
     console.log(search.replace(/\s/g, '').length)
     if(search.replace(/\s/g, '').length != 0 ){
         var xhr = new XMLHttpRequest();
@@ -218,7 +204,7 @@ document.getElementById("artist-uri").addEventListener("keyup", (event)=>{
             if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                 artists = JSON.parse(this.response)
                 console.log(artists)
-                autocomplete(document.getElementById("artist-uri"), artists.map((element)=>element) );
+                autocomplete(document.getElementById("artist-id"), artists.map((element)=>element) );
                 updateDict(artists)
             }else {
                 console.log("Error", this.status);

@@ -30,24 +30,25 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">Artist</span>
-                <input id="artist-uri" list="artist-data" type="text" class="form-control" placeholder="URI"
+                <input id="artist-id" list="artist-data" type="text" class="form-control" placeholder="URI"
                     aria-label="Username" aria-describedby="basic-addon1" required>
             </div>
             <datalist id="artist-data">
 
             </datalist>
             <div class="mb-3">
-                <input type="text" class="form-control" id="playlist-name" placeholder="Artist max popularity">
+                <input type="number" class="form-control" id="artist-max-popularity" placeholder="Artist max popularity">
             </div>
             <div class="mb-3">
-                <input type="text" class="form-control" id="playlist-name" placeholder="Artist max followers">
+                <input type="number" class="form-control" id="artist-max-followers" placeholder="Artist max followers">
             </div>
-  
-            <select id="algorithm" class="form-select form-select-md mb-3" aria-label=".form-select-lg example">
-                <option disabled selected>Song choice method</option>
-                <option value="most_popular">Most popular</option>
+            <select id="artist-selection-method" class="form-select form-select-md mb-3" aria-label=".form-select-lg example">
+                <option disabled selected>Artist selection method</option>
                 <option value="random">Random</option>
+                <option value="popularity">Least popular</option>
+                <option value="followers">Lowest followers</option>
             </select>
+
 
 
             <button id="search-button" onclick="table.search()" class="btn btn-primary"
@@ -68,7 +69,7 @@
 
     </section>
 </body>
-<script src="static/table.js"></script>
+<script src="static/playlist_generator.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
     crossorigin="anonymous"></script>
