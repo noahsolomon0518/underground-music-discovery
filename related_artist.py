@@ -10,6 +10,9 @@ import spotipy
 from spotipy.client import Spotify
 import numpy as np
 from config import *
+from urllib3.util import Retry
+from requests.adapters import HTTPAdapter
+
 
 
 
@@ -18,6 +21,7 @@ aldn_uri = "https://open.spotify.com/artist/2GUw9Wzha61PkZoRVv1PDD?si=Ov8MB150R0
 luke_uri = "https://open.spotify.com/artist/0BvkDsjIUla7X0k6CSWh1I?si=NxDIShP3QsuyV2IWBuoyVQ"
 dylan_uri = "https://open.spotify.com/artist/2Cm6C9PNHioyjRKBfO7n9N?si=39hcxwJuSIeB6nRKTbCR6w"
 brevin_uri = "https://open.spotify.com/artist/7lU8Gtn7moZmPqqu4oPkEh?si=vzbZe3EgScyEECqfrmJECQ"
+
 
 def get_unpopular_related_artist(spotify: Spotify, artist_id):
   artist = spotify.artist(artist_id)
@@ -154,7 +158,7 @@ class RelatedArtistFinder:
     }
 
   def get_related_artists(self, artist_id):
-    related_artists = requests.get(f"https://api.spotify.com/v1/artists/{str(artist_id)}/related-artists", headers= self.authorization_header)
+    related_artists = requests.get(f"https://api.spotify.com/v1/artists/{str(artist_id)}/related-artists", headers= self.authorization_header, )
 
     related_artists.raise_for_status()
     return related_artists.json()["artists"]

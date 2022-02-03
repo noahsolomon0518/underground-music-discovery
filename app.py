@@ -57,7 +57,7 @@ def login_to_spotify():
     state = uuid.uuid1()
     scope = 'user-read-private user-read-email playlist-modify-private playlist-modify-public'
     redirect_uri = request.base_url.replace("/login_to_spotify", "/related_artist_playlist_generator")
-    app.logger.info("Redirect uri %s", redirect_uri)
+    print("Redirect uri", redirect_uri)
     return redirect_to_spotify_login(state, scope, redirect_uri)
 
 @app.route("/related_artist_playlist_generator", methods = ["GET"])
@@ -68,19 +68,19 @@ def get_related_artist_playlist_generator():
 
     elif(("access_token" not in session.keys() or "access_token_expiration_date" not in session.keys()) and "code" in request.args):
         #get access code
-        app.logger.info("Getting access token from authorization code.")
+        print("Getting access token from authorization code.")
         access_token_details = get_access_token(request.args["code"], request.base_url)
-        app.logger.info("User logged in with an access code of %s.", access_token_details["access_token"])
+        print("User logged in with an access code of.", access_token_details["access_token"])
         session["access_token"] = access_token_details["access_token"]
         session["access_token_expiration_date"] = int(datetime.now().timestamp()) + int(access_token_details["expires_in"])
         session["refresh_token"] = access_token_details["refresh_token"]
 
     elif("access_token" in session.keys() and session["access_token_expiration_date"] < int(datetime.now().timestamp())):
-        app.logger.info("Access token expired for user. Sending refresh token.")
+        print("Access token expired for user. Sending refresh token.")
         access_token_details = get_refresh_token(session["refresh_token"])
         session["access_token"] = access_token_details["access_token"]
         session["access_token_expiration_date"] = int(datetime.now().timestamp()) + int(access_token_details["expires_in"])
-        app.logger.info("User logged in with an access code of %s.", access_token_details["access_token"])
+        print("User logged in with an access code of.", access_token_details["access_token"])
 
 
     return render_template("generate_playlist.html")
@@ -101,7 +101,7 @@ def post_related_artist_playlist_generator():
     related_artists = RelatedArtistFinder(session["access_token"], artist, artist_selection_method, 4, 3000, max_popularity, max_followers)
 
     try:
-        app.logger.info("User attempting to find related artists tree.")
+        print("User attempting to find related artists tree.")
         related_artists.search()
     except RequestException as err:
         app.logger.error("Error encountered while searching for related artists. Exception: " + str(err.response.status_code) + " " + err.response.reason)
@@ -111,20 +111,20 @@ def post_related_artist_playlist_generator():
     generated_playlist = PlaylistGenerator(session["access_token"], related_artists.artist_ids, playlist_name)
 
     try:
-        app.logger.info("User attempting to generate playlist.")
+        print("User attempting to generate playlist.")
         generated_playlist.generate_playlist()
     except RequestException as err:
         app.logger.error("Error encountered while generating playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
         return "0"
 
     try:
-        app.logger.info("User attempting to save playlist.")
+        print("User attempting to save playlist.")
         generated_playlist.save_playlist()
     except RequestException as err:
         app.logger.error("Error encountered while saving playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
         return "0"
 
-    app.logger.info("User [%s] successfully generated playlist", generated_playlist.user_id)
+    print("Successfully generated playlist for", generated_playlist.user_id)
 
 
     return "1"
