@@ -10,6 +10,7 @@ from flask.json import jsonify
 from related_artist import RelatedArtistFinder, RelatedArtistsFinderSpotipy, get_spotify, PlaylistGenerator
 from config import *
 from authorize_spotify import *
+import asyncio
 
 user_state = {
 
@@ -25,6 +26,37 @@ def request_task(**kwargs):
 
 def fire_and_forget(**kwargs):
     threading.Thread(target=request_task, args=(kwargs)).start()
+
+async def generate_playlist(artist_id, artist_selection_method, max_followers, max_popularity, playlist_name):
+    """Can generate playlist in a end point without waiting for reponse"""
+    related_artists = RelatedArtistFinder(session["access_token"], artist_id, artist_selection_method, 4, 100, max_popularity, max_followers)
+
+    try:
+        print("User attempting to find related artists tree.")
+        related_artists.search()
+    except RequestException as err:
+        app.logger.error("Error encountered while searching for related artists. Exception: " + str(err.response.status_code) + " " + err.response.reason)
+        return str(err.response.status_code)
+    
+    #Generate and save playlist
+    generated_playlist = PlaylistGenerator(session["access_token"], related_artists.artist_ids, playlist_name)
+
+    try:
+        print("User attempting to generate playlist.")
+        generated_playlist.generate_playlist()
+    except RequestException as err:
+        app.logger.error("Error encountered while generating playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
+        return "0"
+
+    try:
+        print("User attempting to save playlist.")
+        generated_playlist.save_playlist()
+    except RequestException as err:
+        app.logger.error("Error encountered while saving playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
+        return "0"
+
+    print("Successfully generated playlist for", generated_playlist.user_id)
+
 
 
 spotify =  get_spotify()
@@ -101,36 +133,9 @@ def post_related_artist_playlist_generator():
     max_popularity = int(params["maxPopularity"])
     max_followers = int(params["maxFollowers"])
     artist_selection_method = params["artistSelectionMethod"]
+    generate_playlist(artist, artist_selection_method, max_popularity, max_followers, playlist_name)
 
-
-    #Find related artists
-    related_artists = RelatedArtistFinder(session["access_token"], artist, artist_selection_method, 4, 3000, max_popularity, max_followers)
-
-    try:
-        print("User attempting to find related artists tree.")
-        related_artists.search()
-    except RequestException as err:
-        app.logger.error("Error encountered while searching for related artists. Exception: " + str(err.response.status_code) + " " + err.response.reason)
-        return str(err.response.status_code)
     
-    #Generate and save playlist
-    generated_playlist = PlaylistGenerator(session["access_token"], related_artists.artist_ids, playlist_name)
-
-    try:
-        print("User attempting to generate playlist.")
-        generated_playlist.generate_playlist()
-    except RequestException as err:
-        app.logger.error("Error encountered while generating playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
-        return "0"
-
-    try:
-        print("User attempting to save playlist.")
-        generated_playlist.save_playlist()
-    except RequestException as err:
-        app.logger.error("Error encountered while saving playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
-        return "0"
-
-    print("Successfully generated playlist for", generated_playlist.user_id)
 
 
     return "1"
