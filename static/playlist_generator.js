@@ -61,20 +61,12 @@ class Table {
     
     
     #getGeneratedPlaylist(inputData) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", '/related_artist_playlist_generator', true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.onreadystatechange = function () { // Call a function when the state changes.
-                    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                        resolve(JSON.parse(this.response))
-                    }
-                }
-                xhr.send(JSON.stringify(inputData))
-                
-            }, 2000)
-        })
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/related_artist_playlist_generator', true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(inputData))
+        
 
 
     }
@@ -128,7 +120,7 @@ class Table {
             var searchButton = document.getElementById("search-button")
             waitAnimationForSearch(searchButton, this)
             searchButton.innerHTML = "Searching"
-            var data = await this.#getGeneratedPlaylist(inputData)
+            this.#getGeneratedPlaylist(inputData)
             this.isSearching = false
         }
         

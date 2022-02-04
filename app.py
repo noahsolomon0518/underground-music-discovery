@@ -3,13 +3,13 @@ from flask import Flask, make_response, redirect, url_for, session
 from flask import render_template
 from flask import request
 import uuid
+import threading
 from flask_session import Session
 from requests.exceptions import RequestException
 from flask.json import jsonify
 from related_artist import RelatedArtistFinder, RelatedArtistsFinderSpotipy, get_spotify, PlaylistGenerator
 from config import *
 from authorize_spotify import *
-
 
 user_state = {
 
@@ -19,6 +19,12 @@ app = Flask(__name__)
 app.secret_key = "ahhhhh its a secret"
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
+
+def request_task(**kwargs):
+    requests.post(**kwargs)
+
+def fire_and_forget(**kwargs):
+    threading.Thread(target=request_task, args=(kwargs)).start()
 
 
 spotify =  get_spotify()
