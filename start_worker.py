@@ -16,6 +16,7 @@ generate_playlist_queue = Queue(connection=redis_conn)
 
 
 if __name__ == '__main__':
+    print("running worker")
     with Connection(redis_conn):
         worker = Worker(generate_playlist_queue)
         worker.work()
