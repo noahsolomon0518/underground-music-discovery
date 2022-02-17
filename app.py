@@ -1,7 +1,4 @@
-from rq import Connection, Worker
-from rq_win.worker import WindowsWorker
 from datetime import datetime
-import warnings
 from flask import Flask, jsonify, redirect, session
 from flask import render_template
 from flask import request
