@@ -20,8 +20,6 @@ python-dateutil==2.8.2
 redis==4.1.2
 requests==2.26.0
 rq==1.10.1
-rq-dashboard==0.6.1
-rq-win==0.4.0
 six==1.16.0
 spotipy==2.19.0
 times==0.7
