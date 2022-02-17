@@ -13,9 +13,6 @@ idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.3
 MarkupSafe==2.0.1
-music-datagen==0.0.2
-music-datagen-noahsolomon0518==0.0.1
-music-parser==0.0.4
 numpy==1.21.4
 packaging==21.3
 pyparsing==3.0.7
