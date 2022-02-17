@@ -1,21 +1,19 @@
+from rq import Connection, Worker
+from rq_win.worker import WindowsWorker
 from datetime import datetime
 import warnings
 from flask import Flask, redirect, session
 from flask import render_template
 from flask import request
 import uuid
-from rq_win.worker import WindowsWorker
-
+from redis_queue import generate_playlist_queue, redis_conn
 from flask_session import Session
-from flask.json import jsonify
-from related_artist import RelatedArtistsFinderSpotipy, get_spotify
 from config import *
 from authorize_spotify import *
 from generate_playlist import generate_playlist
 
-user_state = {
-
-}
+user_state = {}
+user_queue = []
 
 app = Flask(__name__)
 app.secret_key = "ahhhhh its a secret"
@@ -23,52 +21,11 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 
-spotify =  get_spotify()
-related_artist_finder = RelatedArtistsFinderSpotipy(spotify)
-
-from redis import Redis
-from rq import Queue, Connection, Worker
-import redis
-
-
-redis_host = "redis-15044.c278.us-east-1-4.ec2.cloud.redislabs.com"
-redis_port = 15044
-redis_password = "sPSPqmznaof65h2ltypLo9Bn1U29oLs1"
-
-
-
-redis_conn = Redis(redis_host, redis_port, password = redis_password)
-generate_playlist_queue = Queue(connection=redis_conn, ) 
-
-
-
-
-   
-
 @app.route("/")
 def hello_world():
     session.clear()
-    print(session)
-    return render_template("main.html")
+    return redirect("/related_artists_playlist_generator")
 
-@app.route("/related_artist", methods = ['GET'])
-def get_related_artist():
-    return render_template("related_artist.html")
-
-@app.route("/relatedartists", methods = ['POST'])
-def get_related_artists():
-    params = request.json
-    relativity = int(params["relativity"])
-    thoroughness = int(params["thoroughness"])
-    algorithm:str = params["algorithm"].lower()
-    results = related_artist_finder.search(starting_artists = params["artistURI"], selection_method = algorithm, max_layer = relativity, max_searches_per_layer = thoroughness)
-    return jsonify(results)
-
-@app.route("/search_artists/<artist>", methods = ['GET'])
-def get_search_suggestions(artist):
-    results = related_artist_finder.spotify.search(artist, type = "artist")
-    results = [(suggest["name"], suggest["uri"], suggest["id"]) for suggest in results["artists"]["items"]]
-    return jsonify(results)
 
 @app.route("/login_to_spotify", methods = ['GET'])
 def login_to_spotify():
@@ -76,7 +33,6 @@ def login_to_spotify():
     state = uuid.uuid1()
     scope = 'user-read-private user-read-email playlist-modify-private playlist-modify-public'
     redirect_uri = request.base_url.replace("/login_to_spotify", "/related_artist_playlist_generator")
-    print("Redirect uri", redirect_uri)
     return redirect_to_spotify_login(state, scope, redirect_uri)
 
 @app.route("/related_artist_playlist_generator", methods = ["GET"])
@@ -100,8 +56,6 @@ def get_related_artist_playlist_generator():
         session["access_token"] = access_token_details["access_token"]
         session["access_token_expiration_date"] = int(datetime.now().timestamp()) + int(access_token_details["expires_in"])
         print("User logged in with an access code of.", access_token_details["access_token"])
-
-
     return render_template("generate_playlist.html")
 
 @app.route("/related_artist_playlist_generator", methods = ["POST"])
@@ -115,11 +69,6 @@ def post_related_artist_playlist_generator():
     max_followers = int(params["maxFollowers"])
     artist_selection_method = params["artistSelectionMethod"]
     generate_playlist_queue.enqueue(generate_playlist, artist_id = artist, artist_selection_method = artist_selection_method, max_popularity = max_popularity, max_followers = max_followers, playlist_name = playlist_name, access_token = session["access_token"])
-
-
-    
-
-
     return "1"
     
 
@@ -127,7 +76,6 @@ def post_related_artist_playlist_generator():
 
 
 with Connection(redis_conn):
-    print(1)
     try:
         w = Worker(["default"])
     except:

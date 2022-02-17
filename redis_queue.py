@@ -1,5 +1,5 @@
 from redis import Redis
-from rq import Queue, Connection, Worker
+from rq import Queue
 import redis
 
 
@@ -12,10 +12,3 @@ r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password,
 
 redis_conn = Redis(redis_host, redis_port, password = redis_password)
 generate_playlist_queue = Queue(connection=redis_conn) 
-redis_conn = Redis()
-
-
-
-with Connection(redis_conn):
-    w = Worker(["default"])
-    w.work()
