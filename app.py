@@ -1,16 +1,17 @@
 from datetime import datetime
-from flask import Flask, make_response, redirect, url_for, session
+import warnings
+from flask import Flask, redirect, session
 from flask import render_template
 from flask import request
 import uuid
-import threading
+from rq_win.worker import WindowsWorker
+
 from flask_session import Session
-from requests.exceptions import RequestException
 from flask.json import jsonify
-from related_artist import RelatedArtistFinder, RelatedArtistsFinderSpotipy, get_spotify, PlaylistGenerator
+from related_artist import RelatedArtistsFinderSpotipy, get_spotify
 from config import *
 from authorize_spotify import *
-import asyncio
+from generate_playlist import generate_playlist
 
 user_state = {
 
@@ -21,48 +22,28 @@ app.secret_key = "ahhhhh its a secret"
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-def request_task(**kwargs):
-    requests.post(**kwargs)
-
-def fire_and_forget(**kwargs):
-    threading.Thread(target=request_task, args=(kwargs)).start()
-
-async def generate_playlist(artist_id, artist_selection_method, max_followers, max_popularity, playlist_name):
-    """Can generate playlist in a end point without waiting for reponse"""
-    related_artists = RelatedArtistFinder(session["access_token"], artist_id, artist_selection_method, 4, 100, max_popularity, max_followers)
-
-    try:
-        print("User attempting to find related artists tree.")
-        related_artists.search()
-    except RequestException as err:
-        app.logger.error("Error encountered while searching for related artists. Exception: " + str(err.response.status_code) + " " + err.response.reason)
-        return str(err.response.status_code)
-    
-    #Generate and save playlist
-    generated_playlist = PlaylistGenerator(session["access_token"], related_artists.artist_ids, playlist_name)
-
-    try:
-        print("User attempting to generate playlist.")
-        generated_playlist.generate_playlist()
-    except RequestException as err:
-        app.logger.error("Error encountered while generating playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
-        return "0"
-
-    try:
-        print("User attempting to save playlist.")
-        generated_playlist.save_playlist()
-    except RequestException as err:
-        app.logger.error("Error encountered while saving playlist. Exception: " + str(err.response.status_code) + " " + err.response.reason)
-        return "0"
-
-    print("Successfully generated playlist for", generated_playlist.user_id)
-
-
 
 spotify =  get_spotify()
 related_artist_finder = RelatedArtistsFinderSpotipy(spotify)
 
+from redis import Redis
+from rq import Queue, Connection, Worker
+import redis
 
+
+redis_host = "redis-15044.c278.us-east-1-4.ec2.cloud.redislabs.com"
+redis_port = 15044
+redis_password = "sPSPqmznaof65h2ltypLo9Bn1U29oLs1"
+
+
+
+redis_conn = Redis(redis_host, redis_port, password = redis_password)
+generate_playlist_queue = Queue(connection=redis_conn, ) 
+
+
+
+
+   
 
 @app.route("/")
 def hello_world():
@@ -133,7 +114,8 @@ def post_related_artist_playlist_generator():
     max_popularity = int(params["maxPopularity"])
     max_followers = int(params["maxFollowers"])
     artist_selection_method = params["artistSelectionMethod"]
-    generate_playlist(artist, artist_selection_method, max_popularity, max_followers, playlist_name)
+    generate_playlist_queue.enqueue(generate_playlist, artist_id = artist, artist_selection_method = artist_selection_method, max_popularity = max_popularity, max_followers = max_followers, playlist_name = playlist_name, access_token = session["access_token"])
+
 
     
 
@@ -144,6 +126,14 @@ def post_related_artist_playlist_generator():
 
 
 
+with Connection(redis_conn):
+    print(1)
+    try:
+        w = Worker(["default"])
+    except:
+        warnings.warn("rq worker does not work on windows. Using windows compatible version.")
+        w = WindowsWorker(["default"])
+    w.work()
 
 if __name__ == "__main__":  
     app.run()

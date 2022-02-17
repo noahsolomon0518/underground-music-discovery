@@ -274,15 +274,15 @@ class PlaylistGenerator:
 
     user_id_request = requests.get("https://api.spotify.com/v1/me", headers=self.authorization_header)
     user_id_request.raise_for_status()
-    logging.info("Get user id -> %s", user_id_request.status_code)
+    print("Get user id -> %s", user_id_request.status_code)
     user_id = user_id_request.json()["id"]
     self.user_id = user_id
-    logging.info("user_id = %s", user_id)
+    print("user_id = %s", user_id)
 
     playlist_id_request = requests.post(f"https://api.spotify.com/v1/users/{user_id}/playlists", headers=self.authorization_header, json={"name":self.playlist_name})
     playlist_id_request.raise_for_status()
-    logging.info("Create playlist -> %s", playlist_id_request.status_code)
-    logging.info(playlist_id_request.text)
+    print("Create playlist -> %s", playlist_id_request.status_code)
+    print(playlist_id_request.text)
     playlist_id = playlist_id_request.json()["id"]
 
 
